@@ -2,6 +2,7 @@ from time import sleep
 
 import cv2
 
+
 from cross_classify import cross_classify
 
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
@@ -13,6 +14,7 @@ c = cv2.VideoCapture(0)
 FRAMERATE = 8
 
 decision = 0
+
 
 x, y, face_w, face_h = 0, 0, 0, 0
 while decision != 27:
@@ -29,7 +31,7 @@ while decision != 27:
         roi_color = img[y:y + face_h, x:x + face_w]
         eyes = eye_cascade.detectMultiScale(roi_gray)
         glasses = glasses_cascade.detectMultiScale(roi_gray)
-        eyes, glasses = cross_classify(eyes,glasses)
+        eyes, glasses = cross_classify(eyes, glasses)
         if len(eyes) == 0 and len(glasses) == 0:
             x, y, face_w, face_h = old_dims
     for (ex, ey, ew, eh) in eyes:
