@@ -30,12 +30,6 @@ class CameraSource:
             eyes, glasses = cross_classify(eyes, glasses)
             if len(eyes) == 0 and len(glasses) == 0:
                 self.face_x, face_y, self.face_w, self.face_h = old_dims
-        for (ex, ey, ew, eh) in eyes:
-            cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
-        for (ex, ey, ew, eh) in glasses:
-            cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 0, 255), 2)
-        cv2.rectangle(img, (self.face_x, self.face_y), (self.face_x + self.face_w, self.face_y + self.face_h),
-                      (255, 0, 0), 2)
 
         ratio_x = self.face_w / float(img_width)
         ratio_y = self.face_h / float(img_height)
@@ -45,5 +39,4 @@ class CameraSource:
         print(str(ratio_y) + " ::: " + str(ratio_x))
 
         # cv2.imshow('img', img)
-        decision = cv2.waitKey(1)
         return (ratio_x + ratio_y) / 2.0
