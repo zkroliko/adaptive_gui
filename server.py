@@ -1,28 +1,16 @@
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-
 from cameraSource import CameraSource
+from flask import Flask
 
 PORT_NUMBER = 8080
 
 
-class myHandler(BaseHTTPRequestHandler):
+source = CameraSource()
 
-    source = CameraSource()
+app = Flask(__name__)
 
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        # Send the html message
-        self.wfile.write(str(self.source.get_ratio()))
-        return
+@app.route("/")
+def hello():
+    return str(source.get_ratio())
 
-try:
-    server = HTTPServer(('', PORT_NUMBER), myHandler)
-    print 'Started httpserver on port ', PORT_NUMBER
-
-    server.serve_forever()
-
-except KeyboardInterrupt:
-    print '^C received, shutting down the web server'
-    server.socket.close()
+if __name__ == "__main__":
+    app.run(port=PORT_NUMBER)
