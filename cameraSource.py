@@ -31,8 +31,12 @@ class CameraSource:
             if len(eyes) == 0 and len(glasses) == 0:
                 self.face_x, face_y, self.face_w, self.face_h = old_dims
 
-        ratio_x = self.face_w / float(img_width)
-        ratio_y = self.face_h / float(img_height)
+        if self.face_w > 0 and self.face_h > 0:
+            ratio_x = img_width / float(self.face_w)
+            ratio_y = img_height / float(self.face_h)
+        else:
+            ratio_x = 1.0
+            ratio_y = 1.0
 
         print("----- DIMS ------")
         print(str(self.face_h) + " / " + str(img_height) + " ::: " + str(self.face_w) + " / " + str(img_width))
