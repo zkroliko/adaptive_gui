@@ -1,12 +1,8 @@
-from Tkinter import *
-import urllib2
-from time import sleep
-
 import thread
-
-from multiprocessing import Lock, Queue
-
-import math
+import urllib2
+from Tkinter import *
+from multiprocessing import Queue
+from time import sleep
 
 
 class Application(Frame):
@@ -18,10 +14,13 @@ class Application(Frame):
 
     req = urllib2.Request(url="http://localhost:8080")
 
-    def update(self):
-        ratio = min(self.RATIO_MAX, max(self.RATIO_MIN, float(urllib2.urlopen(self.req).read())))
-        print(ratio)
-        self.queue.put_nowait(ratio)
+    def retrieve_state(self):
+        try:
+            ratio = min(self.RATIO_MAX, max(self.RATIO_MIN, float(urllib2.urlopen(self.req).read())))
+            print(ratio)
+            self.queue.put_nowait(ratio)
+        except urllib2.URLError:
+            print("Failed to update")
 
     # This method is run only by the main thread
     def process_input_queue(self):
@@ -41,10 +40,10 @@ class Application(Frame):
         self.c.pack()
 
         while True:
-            thread.start_new_thread(self.update, ())
+            thread.start_new_thread(self.retrieve_state, ())
             sleep(1.0 / self.FRAME_RATE)
             self.process_input_queue()
-        self.update()
+        self.retrieve_state()
 
 
 root = Tk()
