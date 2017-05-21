@@ -1,7 +1,12 @@
 from Tkinter import *
-import json
 import urllib2
 from time import sleep
+
+import thread
+
+from multiprocessing import Lock, Queue
+
+import math
 
 
 class Application(Frame):
@@ -9,16 +14,27 @@ class Application(Frame):
     FRAMERATE = 20
     c = None
 
-    def update(self):
-        ratio = float(urllib2.urlopen("http://localhost:8080").read(6))
-        print(1.0/ratio)
-        self.update_rectangle(1.0 / (ratio + 0.001))
-        root.update()
+    RATIO_MIN = 0.2
+    RATIO_MAX = 5.0
 
-    def update_rectangle(self, ratio):
-        size = int(50*ratio)
-        self.c.delete("all")
-        self.c.create_rectangle(0, 0, size, size, fill="blue")
+    queue = Queue(FRAMERATE)
+
+    req = urllib2.Request(url="http://localhost:8080")
+
+    def update(self):
+        ratio = min(self.RATIO_MAX,max(self.RATIO_MIN,float(urllib2.urlopen(self.req).read())))
+        print(ratio)
+        self.queue.put_nowait(ratio)
+        # self.update_graphics(ratio)
+
+    # This method is run only by the main thread
+    def process_input_queue(self):
+        if not self.queue.empty():
+            ratio = self.queue.get_nowait()
+            size = int(50*ratio)
+            self.c.delete("all")
+            self.c.create_rectangle(0, 0, size, size, fill="blue")
+            root.update()
 
     def __init__(self, master=None):
         Frame.__init__(self, master)
@@ -28,8 +44,10 @@ class Application(Frame):
         self.c.pack()
 
         while True:
+            thread.start_new_thread(self.update,())
             sleep(1.0 / self.FRAMERATE)
-            self.update()
+            self.process_input_queue()
+        self.update()
 
 root = Tk()
 root.minsize(width=500, height=500)
