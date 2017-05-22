@@ -1,7 +1,8 @@
 import thread
 import urllib2
 from Tkinter import *
-from PIL import Image
+
+import numpy as np
 from multiprocessing import Queue
 from time import sleep
 
@@ -37,12 +38,15 @@ class Application(Frame):
             self.update_image(smooth_ratio)
             root.update()
 
-    def update_image(self,ratio):
-        self.c.delete(self.image)
-        nom, denom = int(ratio*3), 3
-        zoomed = self.photoImg.zoom(nom,nom)
-        self.display_image = zoomed.subsample(denom,denom)
-        self.image = self.c.create_image(2*self.CANVAS_MIDDLE , self.CANVAS_MIDDLE, image=self.display_image)
+    def update_image(self, ratio):
+        nom, denom = int(ratio * 2), 3
+        if (nom, denom) != self.old_scaling_factor:
+            print("aaa")
+            self.old_scaling_factor = nom, denom
+            self.c.delete(self.image)
+            zoomed = self.photoImg.zoom(nom, nom)
+            self.display_image = zoomed.subsample(denom, denom)
+            self.image = self.c.create_image(2 * self.CANVAS_MIDDLE, self.CANVAS_MIDDLE, image=self.display_image)
 
     def calculate_ratio(self, new_ratio):
         ratio = (self.old_ratio * self.RATIO_RETENTION + new_ratio) / 2.0
@@ -61,17 +65,16 @@ class Application(Frame):
         self.old_ratio = self.RATIO_DEFAULT
 
         # Canvas
-        self.c = Canvas(root, width=2*self.CANVAS_SIZE, height=self.CANVAS_SIZE)
+        self.c = Canvas(root, width=2 * self.CANVAS_SIZE, height=self.CANVAS_SIZE)
         self.c.pack()
 
-
         # Image to show in the canvas
-        # self.image_source = PhotoImage(file='image.gif')
-        # self.image_source = Image.open('image.jpg')
-
         self.photoImg = PhotoImage(file='image.gif')
         self.display_image = self.photoImg
-        self.image = self.c.create_image(2*self.CANVAS_MIDDLE, self.CANVAS_MIDDLE, image=self.photoImg)
+        self.image = self.c.create_image(2 * self.CANVAS_MIDDLE, self.CANVAS_MIDDLE, image=self.photoImg)
+
+        # For performance sake
+        self.old_scaling_factor = None
 
         root.update()
 
@@ -81,9 +84,8 @@ class Application(Frame):
             sleep(1.0 / self.FRAME_RATE)
 
 
-
 root = Tk()
-root.minsize(width=2*Application.CANVAS_SIZE, height=Application.CANVAS_SIZE)
+root.minsize(width=2 * Application.CANVAS_SIZE, height=Application.CANVAS_SIZE)
 app = Application(master=root)
 app.mainloop()
 root.destroy()
